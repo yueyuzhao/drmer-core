@@ -1,5 +1,7 @@
 # @drmer/core
 
+[![CircleCI](https://circleci.com/gh/yueyuzhao/drmer-core/tree/main.svg?style=svg&circle-token=a4c3f82c1b414b6df9be767f82e54174fbd00e31)](https://circleci.com/gh/yueyuzhao/drmer-core/tree/main)
+
 Core library for hybrid application
 
 ## Usage

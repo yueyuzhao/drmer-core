@@ -17,7 +17,7 @@ jobs:
           install-yarn: true
           node-version: '16.13'
       - run: yarn install --frozen-lockfile
-      - run: yarn lint
+      - run: yarn lint:src
       - run: yarn test
       - run: yarn build
 
