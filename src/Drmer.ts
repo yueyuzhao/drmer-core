@@ -127,7 +127,7 @@ class Drmer extends Readily {
    * bridge on iOS is ready before the given time, we will use it. And our programs can also run
    * on browser with the given browser bridge.
    * ```js
-   * import {bridge} from "@scratchjr/browser";
+   * import {bridge} from "@drmer/browser";
    * drmer.lazyBindBridge(bridge);
    * drmer.lazyBindBridge(bridge, 1000);
    * ```
