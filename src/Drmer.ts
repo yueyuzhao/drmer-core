@@ -91,7 +91,7 @@ class Drmer extends Readily {
         return;
       }
     }
-    setTimeout(() => {
+    this.timeoutId = setTimeout(() => {
       this.waitForBridge();
     }, 50);
   }
