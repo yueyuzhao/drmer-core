@@ -1,0 +1,56 @@
+{
+  "tags": {
+    "allowUnknownTags": false
+  },
+  "source": {
+    "include": [
+      "src/**/*.ts"
+    ],
+    "excludePattern": "(node_modules|lib|test)"
+  },
+  "plugins": [
+    "plugins/markdown"
+  ],
+  "template": {
+    "outputSourceFiles": true,
+    "readme": "./README.md",
+    "repository": "https://github.com/yueyuzhao/drmer-core.git"
+  },
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false,
+    "default": {
+      "outputSourceFiles": true
+    },
+    "applicationName": "@drmer/core",
+    "footer": "",
+    "copyright": "",
+    "disqus": "",
+    "googleAnalytics": "",
+    "openGraph": {
+      "title": "",
+      "type": "website",
+      "image": "",
+      "site_name": "",
+      "url": ""
+    },
+    "meta": {
+      "title": "@drmer/core API Documentation",
+      "description": "Documentation for @drmer/core",
+      "keyword": "docs, documentation, drmer, @drmer/core, hybrid, javascript, typescript, jsdoc"
+    },
+    "linenums": true
+  },
+  "plugin/markdown": {
+    "parser": "gfm",
+    "hardwrap": false
+  },
+  "opts": {
+    "encoding": "utf8",
+    "recurse": true,
+    "lenient": true,
+    "destination": "./build/docs",
+    "template": "@pixi/webdoc-template",
+    "export": "./build/docs/drmer.api.json"
+  }
+}
