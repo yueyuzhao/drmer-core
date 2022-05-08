@@ -8,6 +8,8 @@ import {global} from "./global";
  * The JS side doesn't need to know which native platform it is running on. Calls to
  * the instance will be bridged to the bond bridge.
  * @example
+ * import {Drmer} from "@drmer/core";
+ * const drmer = new Drmer();
  * // 1. bind the bridge
  * drmer.bindBridge(bridge);
  * // or you can expose a global variable to `window` as name `androidBridge`, `browserBridge`, `desktopBridge`,
@@ -56,16 +58,19 @@ class Drmer extends Readily {
 
   private timeoutId: NodeJS.Timeout | undefined;
 
-  constructor() {
-    super();
-    this.waitForBridge();
-  }
-
   /**
    * The current bond bridge
    */
   public get bridge(): IBridge | undefined {
     return this._bridge;
+  }
+
+  /**
+   * 
+   */
+  public onReady(fcn: () => void): void {
+    super.onReady(fcn);
+    this.waitForBridge();
   }
 
   private waitForBridge() {
@@ -118,6 +123,7 @@ class Drmer extends Readily {
     }
     this._bridge = bridge;
     this.ready = true;
+    clearTimeout(this.timeoutId);
   }
 
   /**
