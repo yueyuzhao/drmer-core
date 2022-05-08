@@ -65,9 +65,6 @@ class Drmer extends Readily {
     return this._bridge;
   }
 
-  /**
-   * 
-   */
   public onReady(fcn: () => void): void {
     super.onReady(fcn);
     this.waitForBridge();
