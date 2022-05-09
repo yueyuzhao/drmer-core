@@ -65,6 +65,12 @@ class Drmer extends Readily {
     return this._bridge;
   }
 
+  /**
+   * Register for callback when this instance turns into
+   * the ready state, will be called directly if it was ready.
+   * This will also start waiting for the bridge.
+   * @param fcn
+   */
   public onReady(fcn: () => void): void {
     super.onReady(fcn);
     this.waitForBridge();

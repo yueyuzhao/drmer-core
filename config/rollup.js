@@ -1,10 +1,30 @@
-// import resolve from 'rollup-plugin-node-resolve';
-// import commonjs from 'rollup-plugin-commonjs';
 import typescript from "rollup-plugin-typescript2";
+import transpile from "@rollup/plugin-buble";
+import {terser} from "rollup-plugin-terser";
 import pkg from "../package.json";
 
 const sourcemap = true;
 const external = Object.keys(pkg.peerDependencies || {});
+
+const plugins = [
+  typescript(),
+  transpile(),
+];
+
+// Disabling minification makes faster
+// watch and better coverage debugging
+if (process.env.NODE_ENV === "production") {
+  plugins.push(terser({
+      output: {
+          comments(node, comment) {
+              return comment.line === 1;
+          },
+      },
+      compress: {
+          drop_console: true,
+      },
+  }));
+}
 
 export default [
   // CommonJS (for Node) and ES module (for bundlers) build.
@@ -16,9 +36,7 @@ export default [
   {
     input: "src/index.ts",
     external,
-    plugins: [
-      typescript()
-    ],
+    plugins: plugins,
     output: [
       {
         file: pkg.main,
