@@ -1,6 +1,6 @@
 {
   "name": "@drmer/core",
-  "version": "0.1.5",
+  "version": "0.1.7",
   "description": "",
   "main": "dist/drmer-core.cjs.js",
   "module": "dist/drmer-core.esm.js",
@@ -16,8 +16,7 @@
     "lint": "run-s lint:*",
     "lint:src": "eslint --ext .js --ext .ts src --ignore-path .gitignore --ignore-pattern \"**/*.tests.ts\" --max-warnings 0",
     "lintfix": "run-s \"lint:* -- --fix\"",
-    "test": "jest",
-    "publish": "run-s build:prod test && npm publish"
+    "test": "jest"
   },
   "author": "",
   "pre-commit": [
