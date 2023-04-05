@@ -3,8 +3,9 @@
  * called `postMessage` to receive data from JS or webview.
  * @memberof core
  */
-interface IBridge {
-  /**
+interface IBridge
+{
+    /**
    * Send messages to the bridge, the message structure is like
    * ```json
    * {
@@ -16,9 +17,9 @@ interface IBridge {
    * ```
    * @param data - the data that needs to be processed
    */
-  postMessage(data: string): void;
+    postMessage(data: string): void;
 }
 
 export {
-  IBridge,
-}
+    IBridge,
+};

@@ -1,1 +1,1 @@
-export const global: any = typeof window != "undefined" ? window : {};
+export const global: any = typeof window !== 'undefined' ? window : {};

@@ -1,7 +1,7 @@
-import {IJob} from "./IJob";
-import {IBridge} from "./IBridge";
-import {Readily} from "./Readily";
-import {global} from "./global";
+import { IJob } from './IJob';
+import { IBridge } from './IBridge';
+import { Readily } from './Readily';
+import { global } from './global';
 
 /**
  * The middleware that native(Android, iOS, Desktop etc) and JS talk to each other.
@@ -49,87 +49,102 @@ import {global} from "./global";
  * drmer.emit("app.pause");
  * @memberof core
  */
-class Drmer extends Readily {
-  private _bridge: IBridge | undefined;
+class Drmer extends Readily
+{
+    private _bridge: IBridge | undefined;
 
-  private jobs: Map<string, IJob> = new Map();
+    private jobs: Map<string, IJob> = new Map();
 
-  private backCallbacks: Function[] = [];
+    private backCallbacks: (() => void)[] = [];
 
-  private timeoutId: NodeJS.Timeout | undefined;
+    private timeoutId: NodeJS.Timeout | undefined;
 
-  /**
+    /**
    * The current bond bridge
    */
-  public get bridge(): IBridge | undefined {
-    return this._bridge;
-  }
+    public get bridge(): IBridge | undefined
+    {
+        return this._bridge;
+    }
 
-  /**
+    /**
    * Register for callback when this instance turns into
    * the ready state, will be called directly if it was ready.
    * This will also start waiting for the bridge.
    * @param fcn
    */
-  public onReady(fcn: () => void): void {
-    super.onReady(fcn);
-    this.waitForBridge();
-  }
-
-  private waitForBridge() {
-    if (this.bridge) {
-      return;
+    public onReady(fcn: () => void): void
+    {
+        super.onReady(fcn);
+        this.waitForBridge();
     }
-    console.log("waiting for active bridge");
-    const bridges = [
-      "androidBridge",
-      "browserBridge",
-      "desktopBridge",
-      "macBridge",
-      "iOSBridge",
-    ];
 
-    for (let i = 0; i < bridges.length; i++) {
-      const bridge = global[bridges[i]];
+    private waitForBridge()
+    {
+        if (this.bridge)
+        {
+            return;
+        }
+        // eslint-disable-next-line no-console
+        console.log('waiting for active bridge');
+        const bridges = [
+            'androidBridge',
+            'browserBridge',
+            'desktopBridge',
+            'macBridge',
+            'iOSBridge',
+        ];
 
-      if (bridge) {
-        console.log(`found bridge: ${bridges[i]}`);
-        this.bindBridge(bridge);
+        for (let i = 0; i < bridges.length; i++)
+        {
+            const bridge = global[bridges[i]];
 
-        return;
-      }
+            if (bridge)
+            {
+                // eslint-disable-next-line no-console
+                console.log(`found bridge: ${bridges[i]}`);
+                this.bindBridge(bridge);
+
+                return;
+            }
+        }
+        this.timeoutId = setTimeout(() =>
+        {
+            this.waitForBridge();
+        }, 50);
     }
-    this.timeoutId = setTimeout(() => {
-      this.waitForBridge();
-    }, 50);
-  }
 
-  /**
+    /**
    * Unbind the bond bridge
    */
-  public unbindBridge(): void {
-    this._bridge = undefined;
-    this.ready = false;
-  }
+    public unbindBridge(): void
+    {
+        this._bridge = undefined;
+        this.ready = false;
+    }
 
-  /**
+    /**
    * Bind bridge manually, you need to unbind the bridge first if
    * other bridge is bond first. After the bridge is bond, this instance
    * will turn into the `ready` state.
    * @param bridge - Bridge that will handle the calls.
    */
-  public bindBridge(bridge: IBridge): void {
-    if (this._bridge) {
-      console.error("bridge bond, unbind first if you need bind another bridge");
+    public bindBridge(bridge: IBridge): void
+    {
+        if (this._bridge)
+        {
+            console.error(
+                'bridge bond, unbind first if you need bind another bridge'
+            );
 
-      return;
+            return;
+        }
+        this._bridge = bridge;
+        this.ready = true;
+        clearTimeout(this.timeoutId);
     }
-    this._bridge = bridge;
-    this.ready = true;
-    clearTimeout(this.timeoutId);
-  }
 
-  /**
+    /**
    * Bind the given bridge after some time.
    * This gives us a chance that we can bind other bridges before the given time.
    * For example, we can lazy bind the browser bridge when running on iOS, when the native
@@ -143,181 +158,207 @@ class Drmer extends Readily {
    * @param bridge - bridge to be bound
    * @param timeout - milliseconds to wait to bind given bridge
    */
-  public lazyBindBridge(bridge: IBridge, timeout: number = 500): void {
-    setTimeout(() => {
-      this.bindBridge(bridge);
-    }, timeout);
-  }
+    public lazyBindBridge(bridge: IBridge, timeout = 500): void
+    {
+        setTimeout(() =>
+        {
+            this.bindBridge(bridge);
+        }, timeout);
+    }
 
-  public close(): void {
-    const backCallbacks = this.backCallbacks;
+    public close(): void
+    {
+        const backCallbacks = this.backCallbacks;
 
-    do {
-      const callbackFn = backCallbacks.pop();
+        do
+        {
+            const callbackFn = backCallbacks.pop();
 
-      callbackFn && callbackFn();
-    } while (backCallbacks.length > 0);
-  }
+            if (callbackFn)
+            {
+                callbackFn();
+            }
+        } while (backCallbacks.length > 0);
+    }
 
-  /**
+    /**
    * Generate a uniq id that will be used by callbacks
    * @private
    */
-  private getId() {
-    let id: string;
+    private getId()
+    {
+        let id: string;
 
-    do {
-      id = "li" + (new Date()).getTime() + Math.floor(Math.random() * 1000);
-      if (!this.jobs.has(id)) {
-        return id
-      }
-      // eslint-disable-next-line no-constant-condition
-    } while (true);
-  }
+        do
+        {
+            id = `li${new Date().getTime()}${Math.floor(Math.random() * 1000)}`;
+            if (!this.jobs.has(id))
+            {
+                return id;
+            }
+            // eslint-disable-next-line no-constant-condition
+        } while (true);
+    }
 
-  /**
+    /**
    * Send commands to native
    * Use this if you need the results.
    * Use `run` instead if you don't needs the results.
    * @param method - Method signature
    * @param params - Arguments
    */
-  public call(method: string, params?: Object): Promise<any> {
-    return this.remoteCall(method, false, params);
-  }
+    public call(method: string, params?: object | string): Promise<any>
+    {
+        return this.remoteCall(method, false, params);
+    }
 
-  /**
+    /**
    * Send commands to native
    * Use this if you need to deserialize the result by JSON.
    * Use `run` instead if you don't needs the results.
    * @param method - Method signature
    * @param params - Arguments
    */
-  public callJson(method: string, params?: Object): Promise<any> {
-    return this.remoteCall(method, true, params);
-  }
-
-  private remoteCall(method: string, needsJson: boolean, params?: Object) {
-    if (!this.bridge) {
-      console.error("No bridge bound, please bind a bridge first");
-
-      return null;
+    public callJson(method: string, params?: object | string): Promise<any>
+    {
+        return this.remoteCall(method, true, params);
     }
 
-    return new Promise((resolve: any) => {
-      const id = this.getId();
+    private remoteCall(method: string, needsJson: boolean, params?: object | string)
+    {
+        return new Promise((resolve: any) =>
+        {
+            this.onReady(() =>
+            {
+                const id = this.getId();
 
-      this.jobs.set(id, {
-        needsJson: needsJson,
-        callback: resolve,
-      })
-      this.bridge.postMessage(JSON.stringify({
-        id: id,
-        method: method,
-        params: params,
-      }));
-    });
-  }
+                this.jobs.set(id, {
+                    needsJson,
+                    callback: resolve,
+                });
+                this.bridge.postMessage(
+                    JSON.stringify({
+                        id,
+                        method,
+                        params,
+                    })
+                );
+            });
+        });
+    }
 
-  /**
+    /**
    * Call native and get live results
    * @param method - Method signature
    * @param params - payload
    * @param cbFn - callback listener
    * @return job id
    */
-  public live(method: string, params?: Object, cbFn?: Function): string | null {
-    if (!this.bridge) {
-      console.error("No bridge bound, please bind a bridge first");
+    public live(method: string, params?: object | string | (() => void), cbFn?: (() => void)): string | null
+    {
+        if (typeof params === 'function')
+        {
+            cbFn = params as (() => void);
+            params = undefined;
+        }
 
-      return null;
+        const id = this.getId();
+
+        this.onReady(() =>
+        {
+            this.jobs.set(id, {
+                listen: true,
+                callback: cbFn,
+            });
+
+            this.bridge.postMessage(
+                JSON.stringify({
+                    id,
+                    method,
+                    params,
+                })
+            );
+        });
+
+        return id;
     }
-    if (typeof params == "function") {
-      cbFn = params;
-      params = undefined;
-    }
 
-    const id = this.getId();
-
-    this.jobs.set(id, {
-      listen: true,
-      callback: cbFn,
-    })
-
-    this.bridge.postMessage(JSON.stringify({
-      id: id,
-      method: method,
-      params: params,
-    }));
-
-    return id;
-  }
-
-  /**
+    /**
    * Unregister for native live jobs
    * @param id - job id
    */
-  public die(id: string): void {
-    this.jobs.delete(id)
-  }
+    public die(id: string): void
+    {
+        this.jobs.delete(id);
+    }
 
-  /**
+    /**
    * Send commands to native
    * Use this if you don't need the results.
    * Use `call` or `callJson` if you need to get the result.
    * @param method - Method signature id
    * @param params - Arguments
    */
-  public run(method: string, params?: Object): void {
-    if (!this.bridge) {
-      return;
+    public run(method: string, params?: object | string): void
+    {
+        this.onReady(() =>
+        {
+            this.bridge.postMessage(
+                JSON.stringify({
+                    method,
+                    params,
+                })
+            );
+        });
     }
-    this.bridge.postMessage(JSON.stringify({
-      method: method,
-      params: params,
-    }));
-  }
 
-  /**
+    /**
    * This is called by the native parts to return results
    * for remote calls.
    * @param id - Job id
    * @param res - Results
    */
-  public dequeue(id: string, res: Object): void {
-    if (!id || !this.jobs.has(id)) {
-      return;
-    }
-    const job = this.jobs.get(id);
-
-    if (typeof job?.callback === "function") {
-      if (job.needsJson) {
-        if (typeof res == "string") {
-          res = JSON.parse(res);
+    public dequeue(id: string, res: object | string): void
+    {
+        if (!id || !this.jobs.has(id))
+        {
+            return;
         }
-      } else {
-        if (typeof res == "object") {
-          res = JSON.stringify(res);
-        }
-      }
-      job.callback(res);
-    }
-    if (job?.listen) {
-      return;
-    }
-    this.jobs.delete(id)
-  }
+        const job = this.jobs.get(id);
 
-  public destroy(): void {
-    super.destroy();
-    if (this.timeoutId) {
-      clearTimeout(this.timeoutId);
+        if (typeof job?.callback === 'function')
+        {
+            if (job.needsJson)
+            {
+                if (typeof res === 'string')
+                {
+                    res = JSON.parse(res);
+                }
+            }
+            else
+            if (typeof res === 'object')
+            {
+                res = JSON.stringify(res);
+            }
+            job.callback(res);
+        }
+        if (job?.listen)
+        {
+            return;
+        }
+        this.jobs.delete(id);
     }
-    this._bridge = undefined;
-    this.jobs.clear();
-  }
+
+    public destroy(): void
+    {
+        super.destroy();
+        if (this.timeoutId)
+        {
+            clearTimeout(this.timeoutId);
+        }
+        this._bridge = undefined;
+        this.jobs.clear();
+    }
 }
 
-export {
-  Drmer,
-}
+export { Drmer };
